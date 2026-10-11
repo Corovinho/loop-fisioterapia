@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Patient } from '../../types';
-import { Search, Plus, ArrowRight, CheckCircle2, SlidersHorizontal, Activity, Dumbbell, Calendar, Heart } from 'lucide-react';
+import { Search, Plus, ArrowRight, CheckCircle2, SlidersHorizontal, Activity, Dumbbell, Calendar, Heart, AlertTriangle } from 'lucide-react';
 import { Badge } from '../common/Badge';
+import { calculateAdherence } from '../../utils/adherence';
 
 interface PatientListProps {
   patients: Patient[];
@@ -17,7 +18,9 @@ export const PatientList: React.FC<PatientListProps> = ({
   onClearDemoData
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'in_progress' | 'achieved'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'in_progress' | 'achieved' | 'alert'>('all');
+
+  const alertPatients = patients.filter(p => calculateAdherence(p).hasRecentAlert);
 
   const filteredPatients = patients.filter((patient) => {
     const matchesSearch =
@@ -28,6 +31,7 @@ export const PatientList: React.FC<PatientListProps> = ({
     if (!matchesSearch) return false;
     if (statusFilter === 'in_progress') return !patient.mainGoalAchieved;
     if (statusFilter === 'achieved') return patient.mainGoalAchieved;
+    if (statusFilter === 'alert') return calculateAdherence(patient).hasRecentAlert;
     return true;
   });
 
@@ -121,6 +125,20 @@ export const PatientList: React.FC<PatientListProps> = ({
           >
             Metas Atingidas ({patients.filter(p => p.mainGoalAchieved).length})
           </button>
+
+          {alertPatients.length > 0 && (
+            <button
+              onClick={() => setStatusFilter('alert')}
+              className={`px-4 py-2.5 text-xs font-semibold rounded-full whitespace-nowrap transition-all flex items-center gap-1.5 ${
+                statusFilter === 'alert'
+                  ? 'bg-amber-600 text-white shadow-sm'
+                  : 'bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200'
+              }`}
+            >
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
+              <span>Alertas de Dor ({alertPatients.length})</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -149,6 +167,7 @@ export const PatientList: React.FC<PatientListProps> = ({
         ) : (
           filteredPatients.map((patient) => {
             const lastEvo = patient.evolutions[0];
+            const adherence = calculateAdherence(patient);
             const initials = patient.name
               .split(' ')
               .map(n => n[0])
@@ -186,6 +205,13 @@ export const PatientList: React.FC<PatientListProps> = ({
                           Em Tratamento
                         </span>
                       )}
+
+                      {adherence.hasRecentAlert && (
+                        <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 flex items-center gap-1">
+                          <AlertTriangle className="w-3 h-3 text-amber-600" />
+                          <span>{adherence.alertText}</span>
+                        </span>
+                      )}
                     </div>
 
                     {/* Objective Box - Soft modern blue tint */}
@@ -207,6 +233,11 @@ export const PatientList: React.FC<PatientListProps> = ({
                           <strong className="text-slate-900 font-bold">EVA {lastEvo.painEVA}/10</strong>
                         </span>
                       )}
+                      <span className="flex items-center gap-1.5">
+                        <span className={`w-2 h-2 rounded-full ${adherence.rate >= 70 ? 'bg-emerald-500' : adherence.rate >= 40 ? 'bg-amber-500' : 'bg-slate-300'}`} />
+                        <span>Adesão:</span>
+                        <strong className="text-slate-900 font-bold">{adherence.rate}%</strong>
+                      </span>
                       <span className="flex items-center gap-1">
                         <Dumbbell className="w-3.5 h-3.5 text-slate-400" />
                         <span>Rotina de Casa:</span>

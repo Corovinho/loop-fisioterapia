@@ -21,7 +21,16 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   const [physioPassword, setPhysioPassword] = useState('••••••••');
 
   // Patient form state
-  const [selectedPatientId, setSelectedPatientId] = useState(patients[0]?.id || '');
+  const [patientCpf, setPatientCpf] = useState(patients[0]?.cpf || '111.222.333-44');
+  const [cpfError, setCpfError] = useState('');
+
+  const formatCpf = (val: string) => {
+    const digits = val.replace(/\D/g, '').slice(0, 11);
+    if (digits.length <= 3) return digits;
+    if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
+    if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+    return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+  };
 
   const handlePhysioSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,8 +39,17 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
   const handlePatientSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (selectedPatientId) {
-      onLoginAsPatient(selectedPatientId);
+    setCpfError('');
+    const cleanInput = patientCpf.replace(/\D/g, '');
+    const matched = patients.find(p => {
+      const pCpf = (p.cpf || '').replace(/\D/g, '');
+      return pCpf === cleanInput;
+    });
+
+    if (matched) {
+      onLoginAsPatient(matched.id);
+    } else {
+      setCpfError('Nenhum paciente cadastrado com este CPF.');
     }
   };
 
@@ -127,29 +145,54 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             </form>
           ) : (
             /* PATIENT LOGIN */
-            <form onSubmit={handlePatientSubmit} className="space-y-5">
-              <div className="p-4 bg-blue-50/70 border border-blue-100 rounded-2xl text-xs text-blue-900 leading-relaxed font-medium">
-                Área do paciente para acompanhar sua rotina diária prescrita e registrar seu nível de dor.
+            <form onSubmit={handlePatientSubmit} className="space-y-4">
+              <div className="p-3.5 bg-blue-50/70 border border-blue-100 rounded-2xl text-xs text-blue-900 leading-relaxed font-medium">
+                Acesse seus exercícios domiciliares e registre sua evolução diária digitando seu CPF.
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Selecione seu Perfil de Paciente
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center justify-between">
+                  <span>CPF do Paciente</span>
+                  <span className="text-[11px] text-slate-400 font-normal">Apenas números</span>
                 </label>
-                <select
-                  value={selectedPatientId}
-                  onChange={(e) => setSelectedPatientId(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm text-slate-900 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-hidden transition-all font-medium"
-                >
-                  {patients.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name} — {p.condition}
-                    </option>
+                <input
+                  type="text"
+                  required
+                  value={patientCpf}
+                  onChange={(e) => {
+                    setPatientCpf(formatCpf(e.target.value));
+                    if (cpfError) setCpfError('');
+                  }}
+                  placeholder="000.000.000-00"
+                  maxLength={14}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm text-slate-900 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-hidden transition-all font-mono font-medium tracking-wide"
+                />
+                {cpfError && (
+                  <p className="text-xs text-rose-600 mt-1.5 font-medium">{cpfError}</p>
+                )}
+              </div>
+
+              {/* Demo quick-picks */}
+              <div className="pt-1">
+                <span className="text-[11px] text-slate-400 font-semibold block mb-1.5">
+                  Atalhos de demonstração (1 clique):
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {patients.slice(0, 3).map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => {
+                        setPatientCpf(p.cpf || '');
+                        setCpfError('');
+                        onLoginAsPatient(p.id);
+                      }}
+                      className="text-[11px] px-2.5 py-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 border border-slate-200/80 rounded-full text-slate-600 font-medium transition-colors"
+                    >
+                      {p.name.split(' ')[0]} ({p.cpf})
+                    </button>
                   ))}
-                </select>
-                <p className="text-[11px] text-slate-400 mt-1.5">
-                  Selecione seu nome cadastrado na clínica para entrar.
-                </p>
+                </div>
               </div>
 
               <div className="pt-2">

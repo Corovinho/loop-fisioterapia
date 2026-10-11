@@ -19,6 +19,7 @@ export const INITIAL_SAMPLE_PATIENTS: Patient[] = [
   {
     id: 'pat-1',
     name: 'Lucas Silveira',
+    cpf: '111.222.333-44',
     phone: '(11) 98765-4321',
     email: 'lucas.silveira@email.com',
     birthDate: '1996-04-15',
@@ -251,6 +252,7 @@ export const INITIAL_SAMPLE_PATIENTS: Patient[] = [
   {
     id: 'pat-2',
     name: 'Mariana Vasconcelos',
+    cpf: '222.333.444-55',
     phone: '(21) 97123-4567',
     email: 'mariana.vasconcelos@email.com',
     birthDate: '1990-09-18',
@@ -375,6 +377,7 @@ export const INITIAL_SAMPLE_PATIENTS: Patient[] = [
   {
     id: 'pat-3',
     name: 'Carlos Eduardo Mendes',
+    cpf: '333.444.555-66',
     phone: '(31) 99876-5432',
     email: 'carlos.mendes@email.com',
     birthDate: '1974-11-03',

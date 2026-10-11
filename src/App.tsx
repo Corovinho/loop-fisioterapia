@@ -12,6 +12,7 @@ import { RecordsTab } from './components/clinical/RecordsTab';
 import { AIAssistantModal } from './components/ai/AIAssistantModal';
 import { PrescriptionBuilder } from './components/prescription/PrescriptionBuilder';
 import { PatientPortalView } from './components/patient-portal/PatientPortalView';
+import { ClinicalReportModal } from './components/clinical/ClinicalReportModal';
 
 export function App() {
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -31,6 +32,7 @@ export function App() {
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
   const [editingPatient, setEditingPatient] = useState<Patient | null>(null);
   const [isAIOpen, setIsAIOpen] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   // Load patients on mount
   useEffect(() => {
@@ -272,6 +274,7 @@ export function App() {
                 onViewAsPatient={() => {
                   setAuthSession({ role: 'patient', patientId: currentPatient.id });
                 }}
+                onOpenReport={() => setIsReportModalOpen(true)}
               />
 
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-1">
@@ -321,12 +324,20 @@ export function App() {
       />
 
       {currentPatient && (
-        <AIAssistantModal
-          isOpen={isAIOpen}
-          onClose={() => setIsAIOpen(false)}
-          patient={currentPatient}
-          onApplyPlan={handleApplyAIPlan}
-        />
+        <>
+          <AIAssistantModal
+            isOpen={isAIOpen}
+            onClose={() => setIsAIOpen(false)}
+            patient={currentPatient}
+            onApplyPlan={handleApplyAIPlan}
+          />
+
+          <ClinicalReportModal
+            isOpen={isReportModalOpen}
+            onClose={() => setIsReportModalOpen(false)}
+            patient={currentPatient}
+          />
+        </>
       )}
     </div>
   );

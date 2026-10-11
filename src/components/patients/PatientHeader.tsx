@@ -1,7 +1,8 @@
 import React from 'react';
 import { Patient } from '../../types';
-import { Target, CheckCircle2, Phone, Calendar, ArrowLeft, Activity, Dumbbell, FolderGit2, Eye, TrendingDown } from 'lucide-react';
+import { Target, CheckCircle2, Phone, Calendar, ArrowLeft, Activity, Dumbbell, FolderGit2, Eye, TrendingDown, FileText } from 'lucide-react';
 import { Badge } from '../common/Badge';
+import { calculateAdherence } from '../../utils/adherence';
 
 export type PatientDetailTab = 'evolution' | 'prescription' | 'records';
 
@@ -13,6 +14,7 @@ interface PatientHeaderProps {
   onEditPatient: () => void;
   onBackToList: () => void;
   onViewAsPatient: () => void;
+  onOpenReport?: () => void;
 }
 
 export const PatientHeader: React.FC<PatientHeaderProps> = ({
@@ -22,7 +24,8 @@ export const PatientHeader: React.FC<PatientHeaderProps> = ({
   onToggleGoalAchieved,
   onEditPatient,
   onBackToList,
-  onViewAsPatient
+  onViewAsPatient,
+  onOpenReport
 }) => {
   const getAge = (dateStr?: string) => {
     if (!dateStr) return null;
@@ -50,7 +53,18 @@ export const PatientHeader: React.FC<PatientHeaderProps> = ({
             <span>Voltar para Lista</span>
           </button>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            {onOpenReport && (
+              <button
+                onClick={onOpenReport}
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-50 border border-blue-200 text-xs font-bold text-blue-700 hover:bg-blue-100 rounded-full shadow-xs transition-colors"
+                title="Gera laudo clínico executivo para médicos e convênios"
+              >
+                <FileText className="w-3.5 h-3.5 text-blue-600" />
+                <span>Gerar Relatório (PDF)</span>
+              </button>
+            )}
+
             <button
               onClick={onViewAsPatient}
               className="inline-flex items-center gap-1.5 px-4 py-2 bg-white border border-slate-200/80 text-xs font-bold text-slate-700 hover:text-blue-600 hover:border-blue-200 rounded-full shadow-xs transition-colors"
@@ -143,7 +157,7 @@ export const PatientHeader: React.FC<PatientHeaderProps> = ({
           </div>
 
           {/* Quick Metrics Bar inside Hero Card */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-4 border-t border-white/15">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-white/15">
             <div className="bg-white/10 backdrop-blur-xs rounded-2xl p-3 border border-white/15">
               <span className="text-[10px] font-bold uppercase tracking-wider text-blue-100 block">
                 Dor Atual (EVA)
@@ -176,7 +190,7 @@ export const PatientHeader: React.FC<PatientHeaderProps> = ({
               </span>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-xs rounded-2xl p-3 border border-white/15 col-span-2 sm:col-span-1">
+            <div className="bg-white/10 backdrop-blur-xs rounded-2xl p-3 border border-white/15">
               <span className="text-[10px] font-bold uppercase tracking-wider text-blue-100 block">
                 Rotina Prescrita
               </span>
@@ -185,6 +199,19 @@ export const PatientHeader: React.FC<PatientHeaderProps> = ({
               </div>
               <span className="text-[10px] text-blue-200 block">
                 Prontos para casa
+              </span>
+            </div>
+
+            <div className="bg-white/10 backdrop-blur-xs rounded-2xl p-3 border border-white/15">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-blue-100 block">
+                Adesão Domiciliar
+              </span>
+              <div className="text-lg font-bold text-white mt-0.5 flex items-center gap-1.5">
+                <span>{calculateAdherence(patient).rate}%</span>
+                <span className={`w-2 h-2 rounded-full ${calculateAdherence(patient).rate >= 70 ? 'bg-emerald-300' : 'bg-amber-300'}`} />
+              </div>
+              <span className="text-[10px] text-blue-200 block">
+                {calculateAdherence(patient).completedLogs} treinos feitos
               </span>
             </div>
           </div>

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Patient, PatientDailyFeedback, EvolutionPhoto } from '../../types';
-import { Target, CheckCircle2, ExternalLink, ChevronDown, ChevronUp, Dumbbell, Award, LogOut, Image as ImageIcon } from 'lucide-react';
+import { Target, CheckCircle2, ExternalLink, ChevronDown, ChevronUp, Dumbbell, Award, LogOut, Image as ImageIcon, Play } from 'lucide-react';
 import { Badge } from '../common/Badge';
 import { WorkoutTimer } from './WorkoutTimer';
 import { PostWorkoutFeedbackModal } from './PostWorkoutFeedbackModal';
+import { GuidedWorkoutModal } from './GuidedWorkoutModal';
 import { BeforeAfterViewer } from '../clinical/BeforeAfterViewer';
 import logoIcon from '../../assets/logo-icon.jpg';
 
@@ -26,6 +27,7 @@ export const PatientPortalView: React.FC<PatientPortalViewProps> = ({
     patient.prescriptions[0]?.id || null
   );
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+  const [isGuidedWorkoutOpen, setIsGuidedWorkoutOpen] = useState(false);
 
   const toggleCompleted = (id: string) => {
     if (completedIds.includes(id)) {
@@ -188,6 +190,32 @@ export const PatientPortalView: React.FC<PatientPortalViewProps> = ({
                 {allCompleted ? '✓ Finalizar e Salvar Treino' : 'Registrar Nível de Dor'}
               </button>
             </div>
+
+            {/* Guided Workout Action Banner */}
+            {patient.prescriptions.length > 0 && (
+              <div className="p-4 sm:p-5 bg-blue-50/70 border border-blue-200/80 rounded-3xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xs">
+                <div className="flex items-center gap-3.5 text-center sm:text-left">
+                  <div className="w-11 h-11 rounded-2xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                    <Play className="w-5 h-5 fill-current ml-0.5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-extrabold text-slate-900">Treino Guiado Passo a Passo</h4>
+                    <p className="text-xs text-slate-600 font-medium mt-0.5">
+                      Execução guiada em tela cheia com cronômetro sonoro integrado.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIsGuidedWorkoutOpen(true)}
+                  className="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-full shadow-sm hover:shadow transition-all shrink-0 flex items-center justify-center gap-2 active:scale-95"
+                >
+                  <Play className="w-3.5 h-3.5 fill-current" />
+                  <span>Iniciar Modo Guiado</span>
+                </button>
+              </div>
+            )}
 
             {patient.prescriptions.length === 0 ? (
               <div className="p-12 text-center bg-white rounded-3xl border border-slate-100 shadow-xs text-sm text-slate-500">
@@ -425,6 +453,18 @@ export const PatientPortalView: React.FC<PatientPortalViewProps> = ({
         completedExercisesIds={completedIds}
         totalExercises={patient.prescriptions.length}
         onSaveFeedback={onSaveFeedback}
+      />
+
+      {/* Guided Step-by-Step Workout Player */}
+      <GuidedWorkoutModal
+        isOpen={isGuidedWorkoutOpen}
+        onClose={() => setIsGuidedWorkoutOpen(false)}
+        exercises={patient.prescriptions}
+        onFinishWorkout={(newCompletedIds) => {
+          setCompletedIds(newCompletedIds);
+          setIsGuidedWorkoutOpen(false);
+          setIsFeedbackModalOpen(true);
+        }}
       />
     </div>
   );

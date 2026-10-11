@@ -17,6 +17,7 @@ export const PatientModal: React.FC<PatientModalProps> = ({
   initialPatient
 }) => {
   const [name, setName] = useState('');
+  const [cpf, setCpf] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [birthDate, setBirthDate] = useState('');
@@ -28,9 +29,18 @@ export const PatientModal: React.FC<PatientModalProps> = ({
   const [mainGoalCategory, setMainGoalCategory] = useState('Retorno ao Esporte');
   const [clinicalHistory, setClinicalHistory] = useState('');
 
+  const formatCpf = (val: string) => {
+    const digits = val.replace(/\D/g, '').slice(0, 11);
+    if (digits.length <= 3) return digits;
+    if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
+    if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+    return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+  };
+
   useEffect(() => {
     if (initialPatient) {
       setName(initialPatient.name);
+      setCpf(initialPatient.cpf || '');
       setPhone(initialPatient.phone || '');
       setEmail(initialPatient.email || '');
       setBirthDate(initialPatient.birthDate || '');
@@ -43,6 +53,7 @@ export const PatientModal: React.FC<PatientModalProps> = ({
       setClinicalHistory(initialPatient.clinicalHistory || '');
     } else {
       setName('');
+      setCpf('');
       setPhone('');
       setEmail('');
       setBirthDate('');
@@ -63,6 +74,7 @@ export const PatientModal: React.FC<PatientModalProps> = ({
     onSave({
       id: initialPatient ? initialPatient.id : `pat-${Date.now()}`,
       name: name.trim(),
+      cpf: cpf.trim() || undefined,
       phone: phone.trim(),
       email: email.trim(),
       birthDate,
@@ -134,7 +146,7 @@ export const PatientModal: React.FC<PatientModalProps> = ({
           </h4>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="sm:col-span-2">
+            <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">Nome Completo *</label>
               <input
                 type="text"
@@ -143,6 +155,18 @@ export const PatientModal: React.FC<PatientModalProps> = ({
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Ex: Lucas Silveira"
                 className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm text-slate-900 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-hidden transition-all"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">CPF (Acesso do Paciente)</label>
+              <input
+                type="text"
+                value={cpf}
+                onChange={(e) => setCpf(formatCpf(e.target.value))}
+                placeholder="000.000.000-00"
+                maxLength={14}
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm text-slate-900 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-hidden transition-all font-mono"
               />
             </div>
 

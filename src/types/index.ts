@@ -86,6 +86,7 @@ export interface PatientDailyFeedback {
 export interface Patient {
   id: string;
   name: string;
+  cpf?: string;
   phone: string;
   email: string;
   birthDate: string;

@@ -19,7 +19,19 @@ export const StorageService = {
         this.savePatients(INITIAL_SAMPLE_PATIENTS);
         return INITIAL_SAMPLE_PATIENTS;
       }
-      return JSON.parse(data);
+      const parsed: Patient[] = JSON.parse(data);
+      let updatedCpf = false;
+      parsed.forEach(p => {
+        if (!p.cpf) {
+          if (p.id === 'pat-1') { p.cpf = '111.222.333-44'; updatedCpf = true; }
+          else if (p.id === 'pat-2') { p.cpf = '222.333.444-55'; updatedCpf = true; }
+          else if (p.id === 'pat-3') { p.cpf = '333.444.555-66'; updatedCpf = true; }
+        }
+      });
+      if (updatedCpf) {
+        this.savePatients(parsed);
+      }
+      return parsed;
     } catch (err) {
       console.error('Error reading patients from storage:', err);
       return [];
